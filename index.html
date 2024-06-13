@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adivina la Canción</title>
+    <style>
+        body {
+            background-color: #f0f8ff; /* Azul claro */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            margin-top: -10px;
+        }
+        h1 {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 30px;
+            color: #0047ab;
+        }
+        #juego {
+            margin-top: -5px;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            display: inline-block;
+            width: 80%;
+            max-width: 600px;
+        }
+        #mensaje {
+            font-weight: bold;
+            margin-top: 10px;
+            color: #d9534f;
+        }
+        #instrucciones {
+            margin-top: 10px;
+            font-size: 1em;
+            color: #555;
+        }
+        #contenedorVideo {
+            display: none;
+            margin-top: 20px;
+        }
+        #imagen {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            display: block;
+        }
+        #audioControl {
+            margin-top: 20px;
+        }
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 25px;
+            border: 2px solid #0047ab;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px 25px;
+            border: none;
+            background-color: #0047ab;
+            color: #fff;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #003687;
+        }
+        p {
+            font-size: 1.2em;
+            color: #333;
+            font-weight: bold; /* Hace el texto más fuerte */
+
+        }
+        #videoOriginal {
+            display: none;
+            margin-top: 20px;
+        }
+        #btnSiguiente {
+            display: none;
+            margin-top: 20px;
+        }
+        video {
+            width: 100%;
+            max-width: 400px;
+            height: 225px; /* Mantener una proporción de 16:9 */
+            border: 2px solid #0047ab;
+            border-radius: 10px;
+            object-fit: cover; /* Asegura que el video se ajuste al contenedor */
+        }
+        #instrucciones2 {
+            margin-top: 20px; /* Incrementa el espacio superior */
+            font-size: 1.2em; /* Aumenta el tamaño de la fuente */
+            font-weight: bold; /* Hace el texto más fuerte */
+            color: #d9534f; /* Cambia el color del texto si es necesario */
+        }
+
+        #instrucciones {
+            margin-top: 20px; /* Incrementa el espacio superior */
+            font-size: 1.2em; /* Aumenta el tamaño de la fuente */
+            font-weight: bold; /* Hace el texto más fuerte */
+            color: #333; /* Cambia el color del texto si es necesario */
+        }
+        #imagen {
+            width: 60%; /* Reducir el ancho al 80% del contenedor */
+            max-width: 200px; /* Limitar el ancho máximo */
+            margin: 20px auto;
+            display: block;
+        }
+         /* Estilos adicionales para aciertos */
+        #contadorAciertos {
+            font-size: 1.3em; /* Tamaño de fuente más grande */
+            color: green; /* Color verde */
+            animation: resaltar 1s infinite alternate; /* Animación sutil */
+        }
+
+        @keyframes resaltar {
+            from {
+                transform: scale(1);
+            }
+            to {
+                transform: scale(1.2);
+            }
+        }
+
+        #aciertos-container {
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background-color: rgba(202, 202, 202, 0.1); /* Fondo semitransparente para visibilidad */
+            padding: 1px 15px; /* Ajuste el padding según sea necesario */
+            border-radius: 15px;
+            margin: 25px;
+        }
+        #aciertos-container p {
+            margin-top: 15px;
+        }
+
+        #contadorAciertos {
+            font-size: 1.3em;
+            color: green;
+        }
+
+        #aciertos-container {
+            background-color: rgba(202, 202, 202, 0.1);
+            padding: 10px 15px; /* Ajusta el padding según sea necesario */
+            border-radius: 15px;
+            margin: 25px auto; /* Ajusta el margen para centrarlo horizontalmente */
+            text-align: center; /* Centra el texto dentro del contenedor */
+        }
+
+        #aciertos-container p {
+            margin-top: 10px; /* Espaciado superior para separar del contenido anterior */
+        }
+        
+        @keyframes slideInFromTop {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Media query para pantallas más pequeñas */
+        @media (max-width: 600px) {
+            #aciertos-container {
+                position: static; /* Cambia la posición a estática para que fluya naturalmente en el documento */
+                margin-top: 20px; /* Ajusta el margen superior para separarlo del contenido superior */
+            }
+        }
+
+        #btnArtistas {
+            position: absolute; /* Cambiar de fixed a absolute */
+            top: 20px;
+            left: 20px;
+            background-color: #3570c2;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+            font-weight: bold; /* Hace el texto más fuerte */
+            font-size: 1.2em; /* Aumenta el tamaño de la fuente */
+        }
+
+        #contenedorArtistas {
+            position: absolute; /* Cambiar si es necesario */
+            top: 60px; /* Ajustar según sea necesario */
+            left: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+        }
+
+        /* Media query para pantallas más pequeñas si es necesario */
+        @media (max-width: 600px) {
+            #btnArtistas {
+                top: 867px; /* Ajuste para pantallas más pequeñas */
+                left: 70px;
+            }
+            #contenedorArtistas {
+                top: 720px; /* Ajuste para pantallas más pequeñas */
+                left: 175px;
+            }
+        }
+
+        .lista-artistas {
+            list-style-type: disc; /* Cambia el estilo del marcador a un círculo */
+            padding-left: 20px; /* Añade un espacio a la izquierda para el marcador */
+        }
+
+        .lista-artistas li {
+            margin: 5px 0; /* Ajusta el margen vertical para separar los elementos de la lista */
+        }
+
+        #btnVerificar {
+            margin-top: 22px; /* Ajusta este valor según sea necesario para mover el botón más abajo */
+        }
+
+        #btnReproducir{
+            margin-top: -5px; /* Ajusta este valor según sea necesario para mover el botón más abajo */
+        }
+
+        #instrucciones2 {
+            display: none;
+            margin-top: 20px; /* Incrementa el espacio superior */
+            font-size: 1.2em; /* Aumenta el tamaño de la fuente */
+            font-weight: bold; /* Hace el texto más fuerte */
+            color: #d9534f; /* Cambia el color del texto si es necesario */
+        }
+        
+    </style>
+</head>
+<body>
+    <h1>♫ Adivina la Canción ♪</h1>
+    <button id="btnArtistas" onclick="mostrarArtistas()">Artistas</button>
+    <div id="contenedorArtistas" style="display: none;">
+        <p>Lista de Artistas:</p>
+<ul class="lista-artistas">
+            <li>Natanael Cano</li>
+            <li>Danny Ocean</li>
+            <li>Gabito Ballesteros</li>
+            <li>Bad Bunny</li>
+            <li>Feid</li>
+            <li>Taylor Swift</li>
+            <li>Sia</li>
+            <li>Victor Cibrian</li>
+            <li>LAGOS</li>
+            <li>Kevin Kaarl</li>
+            <li>Ben E. King</li>
+            <!-- Agrega más artistas según sea necesario -->
+        </ul>
+    </div>
+    <div id="juego">
+        <p id="mensaje"></p>
+        <p id="instrucciones">Instrucciones: Podrás escuchar el audio de la canción solo 2 veces y solo se escucharán los primeros 3 segundos.</p>
+        <p id="mensaje" style="display: none;">Intentos restantes: <span id="intentosRestantes">3</span></p>
+        <img id="imagen" src="Videos/portita.png" alt="Imagen Placeholder">
+        <div id="audioControl">
+            <button id="btnReproducir" onclick="reproducirAudio()">Reproducir</button>
+        </div>
+        <div id="contenedorVideo"></div>
+        <input type="text" id="respuesta" placeholder="Escribe el nombre de la canción">
+        <button id="btnVerificar" onclick="verificarRespuesta()">Verificar</button>
+        <button id="btnSiguiente" onclick="pasarSiguienteVideo()">Avanzar</button>
+        <div id="aciertos-container">
+            <p>Aciertos: <br><span id="contadorAciertos">0</span></p>
+        </div>        
+        <div id="videoOriginal"></div>
+    </div>
+
+    <!-- Script de JavaScript -->
+    <script>
+        var contadorAciertos = 0;
+        var respuestaCorrecta = ""; // Variable para almacenar el nombre correcto del video
+        var videos = [
+            'PORQUE TE VAS',
+            'YA TE OLVIDE',
+            'PACAS DE BILLETES',
+            'OJITOS LINDOS',
+            'CHANDELIER',
+            'LA CANCION',
+            'STYLE',
+            'STAND BY ME',
+            'MONACO',
+            'LUNA',
+            'SAN LUCAS',
+            'ME REHUSO',
+            'PERFECTA',
+            // Agregar más nombres de videos según sea necesario
+        ];
+        var videosReproducidos = new Set(); // Conjunto para almacenar los índices de videos ya reproducidos
+
+        var videoIndex = -1; // Índice del video actual
+        var videoElement; // Elemento de video
+        var audioElement; // Elemento de audio
+        var reproduccionesRestantes = 2; // Número de reproducciones permitidas por video
+        var contadorAciertos = 0;
+        var intentosFallidos = 0; // Variable para contar los intentos fallidos
+
+        // Función para seleccionar un nombre de video al azar de la lista
+        function obtenerVideoAlAzar() {
+            if (videosReproducidos.size === videos.length) {
+                document.getElementById('mensaje').textContent = "¡FELICIDADES, ADIVINASTE TODAS LAS CANCIONES!";
+                document.getElementById('btnReproducir').disabled = true;
+                return null;
+            }
+
+            if (videoIndex === -1 || reproduccionesRestantes === 0) {
+                var nuevoVideoIndex;
+                do {
+                    nuevoVideoIndex = Math.floor(Math.random() * videos.length);
+                } while (videosReproducidos.has(nuevoVideoIndex));
+                
+                videoIndex = nuevoVideoIndex;
+                respuestaCorrecta = videos[videoIndex].toUpperCase();
+                reproduccionesRestantes = 2;
+            }
+            return videos[videoIndex];
+        }
+
+        // Función para mostrar u ocultar el contenedor de artistas
+        function mostrarArtistas() {
+            var contenedorArtistas = document.getElementById('contenedorArtistas');
+
+            // Si el contenedor está visible, ocultarlo; de lo contrario, mostrarlo
+            if (contenedorArtistas.style.display === 'block') {
+                contenedorArtistas.style.display = 'none';
+            } else {
+                contenedorArtistas.style.display = 'block';
+            }
+        }
+
+        // Función para reproducir el audio del video seleccionado
+        function reproducirAudio() {
+            var nombreVideo = obtenerVideoAlAzar(); // Obtener el nombre del video actual
+            if (nombreVideo === null) return; // No reproducir si no hay más videos
+
+            if (reproduccionesRestantes > 0) {
+                var audioPath = 'Videos/' + nombreVideo + '.mp4'; // Ruta completa del video en tu servidor
+
+                // Crear elemento de audio
+                audioElement = document.createElement('audio');
+                audioElement.src = audioPath;
+                audioElement.controls = false; // Ocultar controles de audio
+                audioElement.autoplay = true;
+
+                // Limpiar el contenedor de audio anterior, si existe
+                var contenedorVideo = document.getElementById('contenedorVideo');
+                while (contenedorVideo.firstChild) {
+                    contenedorVideo.removeChild(contenedorVideo.lastChild);
+                }
+
+                // Añadir el nuevo audio al contenedor
+                contenedorVideo.appendChild(audioElement);
+                contenedorVideo.style.display = 'none'; // Asegurar que el contenedor esté oculto
+
+                // Establecer un evento para pausar automáticamente el audio después de 3 segundos
+                audioElement.addEventListener('timeupdate', function() {
+                    if (audioElement.currentTime >= 3) {
+                        audioElement.pause();
+                    }
+                });
+
+                reproduccionesRestantes--;
+
+                // Deshabilitar botón de reproducir si se han agotado las reproducciones
+                if (reproduccionesRestantes === 0) {
+                    document.getElementById('btnReproducir').disabled = true;
+                    document.getElementById('mensaje').textContent = "Ya no puedes reproducir más veces este audio.";
+                }
+            } else {
+                document.getElementById('mensaje').textContent = "Ya no puedes reproducir más veces este audio.";
+            }
+        }
+
+        // Función para verificar la respuesta del usuario
+        // Función para verificar la respuesta del usuario
+        function verificarRespuesta() {
+            var respuestaUsuario = document.getElementById('respuesta').value.trim().toUpperCase();
+
+            if (respuestaUsuario === "") {
+                alert("Escribe el nombre de la canción antes de verificar.");
+                return;
+            }
+
+            if (respuestaUsuario === respuestaCorrecta) {
+                contadorAciertos++;
+                document.getElementById('contadorAciertos').textContent = contadorAciertos; // Actualiza el contador de aciertos
+                videosReproducidos.add(videoIndex); // Añadir el índice del video reproducido al conjunto
+                mostrarVideoOriginal(); // Mostrar el video original antes de pasar al siguiente
+                document.getElementById('btnVerificar').disabled = true; // Deshabilitar el botón de verificar
+                document.getElementById('mensaje').style.display = 'none'; // Ocultar mensaje de intentos restantes
+                document.getElementById('intentosRestantes').textContent = "3"; // Reiniciar los intentos restantes
+            } else {
+                intentosFallidos++;
+                document.getElementById('intentosRestantes').textContent = 3 - intentosFallidos; // Actualizar intentos restantes
+                if (intentosFallidos === 1) {
+                    document.getElementById('mensaje').textContent = "¡Incorrecto, te quedan 2 intentos!";
+                    document.getElementById('mensaje').style.display = 'block'; // Mostrar mensaje de intentos restantes
+                } else if (intentosFallidos === 2) {
+                    document.getElementById('mensaje').textContent = "¡Incorrecto, te queda 1 intento!";
+                    document.getElementById('mensaje').style.display = 'block'; // Mostrar mensaje de intentos restantes
+                } else if (intentosFallidos === 3) {
+                    document.getElementById('mensaje').textContent = "¡Intentos agotados! Reiniciando...";
+                    document.getElementById('mensaje').style.display = 'block'; // Mostrar mensaje de intentos restantes
+                    setTimeout(function() {
+                        location.reload(); // Reiniciar la página después de 3 intentos fallidos
+                    }, 2000); // Espera 2 segundos antes de reiniciar
+                }
+            }
+        }
+        // Función para mostrar el video original durante 10 segundos
+        function mostrarVideoOriginal() {
+            document.getElementById('imagen').style.display = 'none'; // Ocultar imagen
+            var videoPath = 'Videos/' + videos[videoIndex] + '.mp4'; // Ruta completa del video en tu servidor
+
+            // Crear elemento de video
+            var videoOriginalElement = document.createElement('video');
+            videoOriginalElement.src = videoPath;
+            videoOriginalElement.controls = true;
+            videoOriginalElement.autoplay = true;
+            videoOriginalElement.id = 'videoOriginalElement';
+            videoOriginalElement.style.width = '100%'; // Asegurar que el video ocupe todo el ancho del contenedor
+            videoOriginalElement.style.maxWidth = '400px'; // Limitar el tamaño máximo del video
+            videoOriginalElement.style.height = '225px'; // Mantener una proporción de 16:9
+            videoOriginalElement.style.objectFit = 'cover'; // Ajustar el video al contenedor
+
+            // Limpiar el contenedor de video original anterior, si existe
+            var videoOriginalContainer = document.getElementById('videoOriginal');
+            while (videoOriginalContainer.firstChild) {
+                videoOriginalContainer.removeChild(videoOriginalContainer.lastChild);
+            }
+
+            // Crear y agregar el texto de acierto
+            var textoAcierto = document.createElement('p');
+            textoAcierto.textContent = '¡Adivinaste la Canción!';
+            textoAcierto.style.fontSize = '1.5em';
+            textoAcierto.style.color = 'green';
+            textoAcierto.style.fontWeight = 'bold';
+            textoAcierto.style.marginTop = '10px';
+            videoOriginalContainer.appendChild(textoAcierto);
+
+            // Agregar el video original al contenedor
+            videoOriginalContainer.appendChild(videoOriginalElement);
+            videoOriginalContainer.style.display = 'block'; // Mostrar contenedor de video original
+
+            // Crear un contador de tiempo dinámico
+            var segundos = 10;
+            var contadorTiempo = document.createElement('p');
+            contadorTiempo.textContent = ' En ' + segundos + ' segundos restantes podrás avanzar...';
+            contadorTiempo.style.fontSize = '1.1em';
+            contadorTiempo.style.color = 'black';
+            contadorTiempo.style.fontWeight = 'bold';
+            contadorTiempo.style.marginTop = '10px';
+            videoOriginalContainer.appendChild(contadorTiempo);
+
+            var contadorIntervalo = setInterval(function() {
+                segundos--;
+                contadorTiempo.textContent = ' En ' + segundos + ' segundos restantes podrás avanzar...';
+                if (segundos <= 0) {
+                    clearInterval(contadorIntervalo);
+                    videoOriginalElement.pause();
+                    document.getElementById('btnSiguiente').style.display = 'inline-block'; // Mostrar botón de siguiente
+                    videoOriginalContainer.removeChild(textoAcierto); // Quitar el texto de acierto
+                    videoOriginalContainer.removeChild(contadorTiempo); // Quitar el contador dinámico
+                }
+            }, 1000);
+
+        }
+
+        // Función para reproducir el audio del video seleccionado
+        function reproducirAudio() {
+            // Limpiar mensaje de error anterior
+            document.getElementById('mensaje').textContent = "";
+
+            var nombreVideo = obtenerVideoAlAzar(); // Obtener el nombre del video actual
+            if (nombreVideo === null) return; // No reproducir si no hay más videos
+
+            if (reproduccionesRestantes > 0) {
+                var audioPath = 'Videos/' + nombreVideo + '.mp4'; // Ruta completa del video en tu servidor
+
+                // Cambiar la imagen estática por la animada
+                document.getElementById('imagen').src = 'Videos/disco2.gif';
+
+                // Crear elemento de audio
+                audioElement = document.createElement('audio');
+                audioElement.src = audioPath;
+                audioElement.controls = false; // Ocultar controles de audio
+                audioElement.autoplay = true;
+
+                // Limpiar el contenedor de audio anterior, si existe
+                var contenedorVideo = document.getElementById('contenedorVideo');
+                while (contenedorVideo.firstChild) {
+                    contenedorVideo.removeChild(contenedorVideo.lastChild);
+                }
+
+                // Añadir el nuevo audio al contenedor
+                contenedorVideo.appendChild(audioElement);
+                contenedorVideo.style.display = 'none'; // Asegurar que el contenedor esté oculto
+
+                // Establecer un evento para pausar automáticamente el audio después de 3 segundos
+                audioElement.addEventListener('timeupdate', function() {
+                    if (audioElement.currentTime >= 3) {
+                        audioElement.pause();
+                        // Volver a cambiar la imagen estática después de reproducir
+                        document.getElementById('imagen').src = 'Videos/portita.png';
+                    }
+                });
+
+                reproduccionesRestantes--;
+
+                // Deshabilitar botón de reproducir si se han agotado las reproducciones
+                if (reproduccionesRestantes === 0) {
+                    document.getElementById('btnReproducir').disabled = true;
+                    document.getElementById('mensaje').textContent = "Ya no puedes reproducir más veces este audio.";
+                }
+            } else {
+                document.getElementById('mensaje').textContent = "Ya no puedes reproducir más veces este audio.";
+            }
+        }
+
+
+        // Función para pasar al siguiente video
+        function pasarSiguienteVideo() {
+        document.getElementById('respuesta').value = ""; // Limpiar campo de respuesta
+        document.getElementById('mensaje').textContent = ""; // Limpiar mensaje
+
+        var videoOriginalElement = document.getElementById('videoOriginalElement');
+        if (videoOriginalElement) {
+            videoOriginalElement.pause(); // Detener el video original si está reproduciéndose
+        }
+
+        document.getElementById('videoOriginal').style.display = 'none'; // Ocultar contenedor de video original
+        document.getElementById('imagen').style.display = 'block'; // Mostrar imagen
+
+        // Reiniciar intentos fallidos
+        intentosFallidos = 0;
+
+        // Obtener un nuevo video
+        reproduccionesRestantes = 0; // Forzar la selección de un nuevo video en la próxima reproducción
+        document.getElementById('btnReproducir').disabled = false; // Habilitar nuevamente el botón de reproducir
+        document.getElementById('btnVerificar').disabled = false; // Habilitar el botón de verificar nuevamente
+        document.getElementById('btnSiguiente').style.display = 'none'; // Ocultar botón de siguiente
+        obtenerVideoAlAzar(); // Obtener un nuevo video y actualizar la respuesta correcta
+    }
+    </script>
+</body>
+</html>
